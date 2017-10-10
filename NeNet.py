@@ -1,5 +1,7 @@
 import numpy as np
 import random
+import preProcessing as pp
+
 def sigmoid(x):
     return (1+np.exp(-1*x))**(-1)
 class NeNet:
@@ -13,10 +15,10 @@ class NeNet:
             randomes = lambda x: list(map(lambda x: randome(x), range(x)))
             rand = randomes(dimList[val+1]*dimList[val])
             rand2 = randomes(dimList[val+1])
-                           
+
             newWeight = np.array(rand).reshape(dimList[val+1], dimList[val])
             newBias = np.array(rand2).reshape(dimList[val+1],1)
-            
+
             self.weightList.append(newWeight)
             self.biases.append(newBias)
 
@@ -31,7 +33,7 @@ class NeNet:
             naccumulator = np.transpose(np.dot(np.transpose(accumulator),weight)) * (1-layer) * layer
             weight = self.update(weight, tnorm*np.dot(accumulator,np.transpose(layer)))
             newWeights.append(weight)
-            bias = self.update(bias, tnorm*np.dot(accumulator,ones)) 
+            bias = self.update(bias, tnorm*np.dot(accumulator,ones))
             newBiases.append(bias)
             accumulator = naccumulator
         self.weightList = newWeights
@@ -46,7 +48,7 @@ class NeNet:
 
     def update(self, weight, grad):
         return weight - self.rate*grad
-        
+
     def forward(self,inpData):
         ones = np.array(list(map(lambda x: 1, range(inpData.shape[1])))).reshape(inpData.shape[1],1)
         nLayer = inpData
@@ -62,3 +64,20 @@ class NeNet:
         o=self.forward(inpData)
         self.backward(t,o)
         return o
+
+x_train, x_test, y_train, y_test=pp.preProcess(0.8)
+inSize=x_train.shape[0]
+outSize=y_train.shape[0]
+neuralN = NeNet([inSize,10,outSize], 0.01)
+outPut=neuralN.train(y_train, x_train)
+print("outPut is ",outPut)
+print("outPut Size is", outPut.shape)
+maxInOutput=np.argmax(outPut, axis=0)
+maxInTarget=np.argmax(y_train,axis=0)
+
+count=0
+for i in range(len(maxInOutput)):
+   if maxInOutput[i] == maxInTarget[i]:
+      count+=1
+accuracy=count/len(maxInOutput)
+print("accuracy is: ", accuracy)
