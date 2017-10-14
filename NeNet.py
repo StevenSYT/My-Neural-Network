@@ -1,6 +1,16 @@
 import numpy as np
+import pandas as pd
 import random
 import preProcessing as pp
+import matplotlib.pyplot as plt
+import sys
+
+def getDatasetUrl(x):
+   return {
+        'ds1': "https://archive.ics.uci.edu/ml/machine-learning-databases/car/car.data",
+        'ds2': "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data",
+        'ds3': "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data"
+   }[x]
 
 def sigmoid(x):
     return (1+np.exp(-1*x))**(-1)
@@ -64,20 +74,49 @@ class NeNet:
         o=self.forward(inpData)
         self.backward(t,o)
         return o
+    def accuracy(self, outPut, target):
+      maxInOutput=np.argmax(outPut, axis=0)
+      maxInTarget=np.argmax(target,axis=0)
+      count=0
+      for i in range(len(maxInOutput)):
+         if maxInOutput[i] == maxInTarget[i]:
+            count+=1
+      return count/len(maxInOutput)
+   #  def printNN(self):
+   #    for layer in self.
 
-x_train, x_test, y_train, y_test=pp.preProcess(0.8)
-inSize=x_train.shape[0]
-outSize=y_train.shape[0]
-neuralN = NeNet([inSize,10,outSize], 0.01)
-outPut=neuralN.train(y_train, x_train)
-print("outPut is ",outPut)
-print("outPut Size is", outPut.shape)
-maxInOutput=np.argmax(outPut, axis=0)
-maxInTarget=np.argmax(y_train,axis=0)
 
-count=0
-for i in range(len(maxInOutput)):
-   if maxInOutput[i] == maxInTarget[i]:
-      count+=1
-accuracy=count/len(maxInOutput)
-print("accuracy is: ", accuracy)
+
+url=getDatasetUrl(sys.argv[1])
+rawData = pd.read_csv(url, header=None)
+percentage=float(sys.argv[2])/100
+maxIteration=int(sys.argv[3])
+print("maxIteration is ", maxIteration)
+layers=list(map(lambda layer: int(layer), sys.argv[5:]))
+print("laysers are ", layers)
+x_train, x_test, y_train, y_test=pp.preProcess(rawData, percentage)
+dimList=[]
+dimList=np.append(dimList, x_train.shape[0])
+dimList=np.append(dimList, layers)
+dimList=np.append(dimList, y_train.shape[0])
+dimList=dimList.astype(int)
+neuralN = NeNet(dimList, 0.5)
+accuArray=[]
+accuTemp=0
+j=0
+print("Start training ...")
+while j<maxIteration and accuTemp<0.99:
+   trainOutPut=neuralN.train(y_train, x_train)
+   j+=1
+   accuTemp=neuralN.accuracy(trainOutPut, y_train)
+   accuArray=np.append(accuArray,accuTemp)
+   print("Training process: "+str(j)+"/"+str(maxIteration), end='\r')
+testOutPut=neuralN.forward(x_test)
+print("training accuracy is ", neuralN.accuracy(trainOutPut, y_train))
+print("testing accuracy is ", neuralN.accuracy(testOutPut, y_test))
+plt.plot(np.arange(j),accuArray)
+plt.show()
+# print("outPut is ",outPut)
+# print("outPut Size is", outPut.shape)
+
+# print("accuracy is: ", accuracy)

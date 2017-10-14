@@ -2,21 +2,20 @@ import pandas as pd
 import numpy as np
 import numbers
 
-url= "car.csv"
-def preProcess(percent):
-   rawData = pd.read_csv(url, header=None)
+# url= "adult.csv"
+def preProcess(rawData, percent):
+   # rawData = pd.read_csv(url, header=None)
    numOfAttributes= rawData.shape[1]
 
    #check if any instance has missing data
    for column in rawData:
       for index,row in rawData.iterrows():
-         if index==0:
-            pass
-         elif rawData.loc[index][column]==None:
+
+         if rawData.loc[index][column]=="?" :
             rawData.drop(rawData.index[index], inplace = True)
 
    print("rawData.shape: ", rawData.shape)
-   dummyDf = pd.DataFrame()
+   precessedDf = pd.DataFrame()
 
 
    for column in rawData:
@@ -24,24 +23,24 @@ def preProcess(percent):
       if isinstance(rawData.iloc[0,column], numbers.Number) :
          rawRow=rawData.iloc[:,column]
          rawRow=(rawRow-rawRow.mean())/rawRow.std()
-         rawData.iloc[:,column]=rawRow
+         # rawData.iloc[:,column]=rawRow
+         precessedDf=pd.concat([precessedDf, rawRow], axis=1)
          pass
       #convert the categorical data into numeric ones
       else:
-         dummyDf=pd.concat([dummyDf, pd.get_dummies(rawData[column])], axis=1)
-   print("dummy shape: ", dummyDf.shape[1])
+         precessedDf=pd.concat([precessedDf, pd.get_dummies(rawData[column])], axis=1)
+   print("dummy shape: ", precessedDf.shape[1])
    outSize=pd.get_dummies(rawData[numOfAttributes-1]).shape[1]
    print("outSize:",outSize)
 
    #split data
-   return split(dummyDf, outSize, percent)
+   return split(precessedDf, outSize, percent)
 
    # print(trainData[1])
 
 def split(dataSet, outSize, percent):
    numpyData = dataSet.as_matrix()
    np.random.shuffle(numpyData)
-   print(numpyData)
    print("numpyData shape:",numpyData.shape)
    numpyData=np.transpose(numpyData)
    print("numpyData shape after transpose:",numpyData.shape)
@@ -57,6 +56,7 @@ def split(dataSet, outSize, percent):
    y_test=y[:,numOfTraining:]
    print("numOfTraining=",numOfTraining," shape of x_train= ", x_train.shape)
    print("numOfTest=",dataSet.shape[0]-numOfTraining," shape of x_test= ", x_test.shape)
+   print("y_train=" ,y_train)
    print("numOfTraining=",numOfTraining," shape of y_train= ", y_train.shape)
    print("numOfTest=",dataSet.shape[0]-numOfTraining," shape of y_test= ", y_test.shape)
 
