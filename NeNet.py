@@ -1,16 +1,11 @@
 import numpy as np
 import pandas as pd
+from pandas import DataFrame as df
 import random
-import preProcessing as pp
 import matplotlib.pyplot as plt
 import sys
 
-def getDatasetUrl(x):
-   return {
-        'ds1': "https://archive.ics.uci.edu/ml/machine-learning-databases/car/car.data",
-        'ds2': "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data",
-        'ds3': "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data"
-   }[x]
+
 
 def sigmoid(x):
     return (1+np.exp(-1*x))**(-1)
@@ -82,19 +77,58 @@ class NeNet:
          if maxInOutput[i] == maxInTarget[i]:
             count+=1
       return count/len(maxInOutput)
-   #  def printNN(self):
-   #    for layer in self.
+    def printNN(self):
+      print("doing this shit thing now...")
+      print("the lenghth of layers is: ",len(self.weightList))
+      for i in range(len(self.weightList)):
+         weightMatrix=self.weightList[i]
+         print("Layer "+str(i)+" ",end='')
+         if i==0:
+            print("(Input Layer):")
+         elif i==len(self.weightList)-1:
+            print("(Last Hidden Layer):")
+         else:
+            print("(hidden layer "+str(i)+"):")
+         for u in range(weightMatrix.shape[1]):
+            print("Neural "+str(u)+" weights:"+str(weightMatrix[:,u]))
+def split(dataSet, outSize, percent):
+   numpyData = dataSet.as_matrix()
+   np.random.shuffle(numpyData)
+   # print("numpyData shape:",numpyData.shape)
+   numpyData=np.transpose(numpyData)
+   # print("numpyData shape after transpose:",numpyData.shape)
+
+   x=numpyData[0:-(outSize)]
+   y=numpyData[-outSize:]
+   # print("x.shape= ", x.shape)
+   # print("y.shape= ", y.shape)
+   numOfTraining = (int)(dataSet.shape[0]* percent)
+   x_train = x[:,0:numOfTraining]
+   x_test=x[:,numOfTraining:] #ndarray slice: [a,b] means [a,b)
+   y_train = y[:,0:numOfTraining]
+   y_test=y[:,numOfTraining:]
+   # print("numOfTraining=",numOfTraining," shape of x_train= ", x_train.shape)
+   # print("numOfTest=",dataSet.shape[0]-numOfTraining," shape of x_test= ", x_test.shape)
+   # print("y_train=" ,y_train)
+   # print("numOfTraining=",numOfTraining," shape of y_train= ", y_train.shape)
+   # print("numOfTest=",dataSet.shape[0]-numOfTraining," shape of y_test= ", y_test.shape)
+   return x_train, x_test, y_train, y_test
+
+postProcessedDf = df.from_csv(sys.argv[1])
+outSize=pd.get_dummies(postProcessedDf.iloc[:,-1]).shape[1]
+postProcessedDf=pd.concat([postProcessedDf, pd.get_dummies(postProcessedDf.iloc[:,-1])], axis=1)
+
+postProcessedDf.drop('class', axis=1, inplace=True)
 
 
-
-url=getDatasetUrl(sys.argv[1])
-rawData = pd.read_csv(url, header=None)
 percentage=float(sys.argv[2])/100
+print("the percentage is ", percentage)
 maxIteration=int(sys.argv[3])
 print("maxIteration is ", maxIteration)
 layers=list(map(lambda layer: int(layer), sys.argv[5:]))
 print("laysers are ", layers)
-x_train, x_test, y_train, y_test=pp.preProcess(rawData, percentage)
+x_train, x_test, y_train, y_test=split(postProcessedDf, outSize, percentage)
+
 dimList=[]
 dimList=np.append(dimList, x_train.shape[0])
 dimList=np.append(dimList, layers)
@@ -111,10 +145,14 @@ while j<maxIteration and accuTemp<0.99:
    accuTemp=neuralN.accuracy(trainOutPut, y_train)
    accuArray=np.append(accuArray,accuTemp)
    print("Training process: "+str(j)+"/"+str(maxIteration), end='\r')
+print("Training is done!!")
+neuralN.printNN()
 testOutPut=neuralN.forward(x_test)
 print("training accuracy is ", neuralN.accuracy(trainOutPut, y_train))
 print("testing accuracy is ", neuralN.accuracy(testOutPut, y_test))
 plt.plot(np.arange(j),accuArray)
+plt.xlabel("number of iterations")
+plt.ylabel("training accuracy")
 plt.show()
 # print("outPut is ",outPut)
 # print("outPut Size is", outPut.shape)
