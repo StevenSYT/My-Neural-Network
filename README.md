@@ -10,7 +10,9 @@ the input parameters to the preProcessing.py file are:
   - ds2: https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data
   - ds3: https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data
 + complete output path of the pre-processed dataset. For example 'postProcessed.csv' can be a path for the output file.
+
 for example **" python3 preProcessing.py ds1 'postProcessed.csv' "** 
+The above would imply that the training dataset is 'ds1' which is the first dataset listed above. The output path is 'currentDirectory/postProcessed.csv'
 
 ### Back-propagation
 The input parameters to the NeNet.py
