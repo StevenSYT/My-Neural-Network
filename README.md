@@ -28,5 +28,5 @@ parameter is used so that your program terminates in a reasonable time.
 
 for example **" python3 NeNet.py 'postProcessed.csv' 80 4000 2 10 10 "**
 The above would imply that the dataset is 'postProcessed.csv', the percent of the dataset to be used for
-training is 80%, the maximum number of iterations is 200, and there are 2 hidden layers with
-(4, 2) neurons. Your program would have to initialize the weights randomly
+training is 80%, the maximum number of iterations is 4000, and there are 2 hidden layers with
+(10, 10) neurons. Your program would have to initialize the weights randomly
