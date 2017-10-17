@@ -1,4 +1,4 @@
-## Neural-Network
+## Back-propagation Neural Network
 Command line instruction:
 we recommend using python3 to run this program
 The program includes two .py files: preProcessing.py and NeNet.py.
