@@ -1,4 +1,7 @@
-## Back-propagation Neural Network
+## My Neural Network
+This neural network can also be called Multilayer Perceptron. The activation function is sigmoid.
+
+## How to use this repo
 Command line instruction:
 we recommend using python3 to run this program
 The program includes two .py files: preProcessing.py and NeNet.py.
